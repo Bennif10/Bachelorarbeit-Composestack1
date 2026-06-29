@@ -1,0 +1,39 @@
+services:
+  fastapi:
+    build: ./app
+    container_name: docker_b_fastapi
+    ports:
+      - "80:80"
+    environment:
+      - DATABASE_USERS_URL=postgresql://user:password@<IP_VON_VM2>:5432/users_db
+      - DATABASE_DATA_URL=postgresql://user:password@<IP_VON_SERVER2_VM1>:5432/frontend_data_db
+    networks:
+      - app_network
+
+  allinone:
+    pid: host
+    image: neuvector/allinone:5.4.5
+    container_name: allinone
+    privileged: true
+    environment:
+        - NV_PLATFORM_INFO=platform=Docker
+    ports:
+        - 18300:18300
+        - 18301:18301
+        - 18400:18400
+        - 18401:18401
+        - 18301:18301/udp
+        - 8443:8443
+    volumes:
+        - /lib/modules:/lib/modules:ro
+        - /var/neuvector:/var/neuvector
+        - /var/run/docker.sock:/var/run/docker.sock:ro
+        - /proc:/host/proc:ro
+        - /sys/fs/cgroup:/host/cgroup:ro
+    networks: 
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
