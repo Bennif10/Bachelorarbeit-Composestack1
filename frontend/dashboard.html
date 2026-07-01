@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+</head>
+
+<body>
+
+<h1>Dashboard</h1>
+
+<form id="workloadForm">
+
+    <input
+        type="text"
+        id="vm_name"
+        placeholder="VM Name"
+        required>
+
+    <br><br>
+
+    <input
+        type="number"
+        id="cpu"
+        placeholder="CPU"
+        required>
+
+    <br><br>
+
+    <input
+        type="number"
+        id="ram"
+        placeholder="RAM"
+        required>
+
+    <br><br>
+
+    <button type="submit">
+        Workload erstellen
+    </button>
+
+</form>
+
+<p id="result"></p>
+
+<script>
+
+document.getElementById("workloadForm").addEventListener("submit",async function(e){
+
+    e.preventDefault();
+
+    const data = new URLSearchParams();
+
+    data.append("vm_name",document.getElementById("vm_name").value);
+    data.append("cpu",document.getElementById("cpu").value);
+    data.append("ram",document.getElementById("ram").value);
+
+    const response = await fetch("http://localhost:8000/workload",{
+
+        method:"POST",
+        body:data
+
+    });
+
+    const json = await response.json();
+
+    document.getElementById("result").innerHTML=json.success
+        ? "Workload erfolgreich erstellt."
+        : "Fehler.";
+
+});
+
+</script>
+
+</body>
+</html>

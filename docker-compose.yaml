@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   fastapi:
     build: ./app
@@ -12,6 +10,22 @@ services:
     networks:
       - app_network
     restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: docker_b_frontend
+
+    ports:
+      - "8080:80"
+
+    depends_on:
+      - fastapi
+
+    networks:
+      - app_network
+
+    restart: unless-stopped
+
 
   allinone:
     pid: host
