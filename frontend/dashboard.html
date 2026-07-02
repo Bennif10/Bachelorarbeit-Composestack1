@@ -56,7 +56,7 @@ document.getElementById("workloadForm").addEventListener("submit",async function
     data.append("cpu",document.getElementById("cpu").value);
     data.append("ram",document.getElementById("ram").value);
 
-    const response = await fetch("http://localhost:8000/workload",{
+    const response = await fetch("http://localhost:80/workload",{
 
         method:"POST",
         body:data

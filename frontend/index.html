@@ -45,7 +45,7 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
     data.append("username", document.getElementById("username").value);
     data.append("password", document.getElementById("password").value);
 
-    const response = await fetch("http://10.1.90.120:8000/login",{
+    const response = await fetch("http://localhost:80/login",{
         method:"POST",
         body:data
     });
