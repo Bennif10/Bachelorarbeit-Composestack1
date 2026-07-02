@@ -13,13 +13,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-MOCK_USERS = {
-    "user1": "password123",
-    "user2": "securepass",
-    "admin": "bachelor2026"
-}
 
-mock_workload_database = []
 
 
 @app.get("/")
@@ -28,46 +22,38 @@ def health():
 
 
 @app.post("/login")
-async def login(
-    username: str = Form(...),
-    password: str = Form(...)
-):
+async def login(username: str = Form(...), password: str = Form(...)):
 
-    if username in MOCK_USERS and MOCK_USERS[username] == password:
-        return {
-            "success": True,
-            "username": username
-        }
+    with users_engine.connect() as conn:
+        result = conn.execute(
+            text("SELECT password FROM users WHERE username=:u"),
+            {"u": username}
+        ).fetchone()
 
-    raise HTTPException(
-        status_code=401,
-        detail="Ungültiger Benutzername oder Passwort"
-    )
+    if result and result[0] == password:
+        return {"success": True, "username": username}
+
+    raise HTTPException(status_code=401, detail="Invalid login")
 
 
 @app.post("/workload")
-async def create_workload(
-    vm_name: str = Form(...),
-    cpu: int = Form(...),
-    ram: int = Form(...)
-):
+async def create_workload(vm_name: str = Form(...), cpu: int = Form(...), ram: int = Form(...)):
 
-    workload = {
-        "vm_name": vm_name,
-        "cpu": cpu,
-        "ram": ram
-    }
+    with data_engine.connect() as conn:
+        conn.execute(
+            text("""
+                INSERT INTO workloads (vm_name, cpu, ram)
+                VALUES (:vm_name, :cpu, :ram)
+            """),
+            {
+                "vm_name": vm_name,
+                "cpu": cpu,
+                "ram": ram
+            }
+        )
+        conn.commit()
 
-    mock_workload_database.append(workload)
-
-    db_url = os.getenv("DATABASE_DATA_URL")
-
-    print(f"[LABOR] Schreibe nach {db_url}: {workload}")
-
-    return {
-        "success": True,
-        "workload": workload
-    }
+    return {"success": True}
 
 
 @app.get("/workloads")
