@@ -27,6 +27,24 @@ services:
 
     restart: unless-stopped
 
+  enforcer:
+    pid: host
+    image: neuvector/enforcer:5.5.3
+    container_name: enforcer
+    privileged: true
+    network_mode: host
+    environment:
+      # Controller-IP bleibt immer gleich
+      - CLUSTER_JOIN_ADDR=10.1.90.120
+      # Eigene IP der neuen VM
+      - CLUSTER_ADVERTISE_ADDR=10.1.90.123 
+    volumes:
+      - /home/follertb/certs/internal:/etc/neuvector/certs/internal:ro
+      - /lib/modules:/lib/modules
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /proc:/host/proc:ro
+      - /sys/fs/cgroup/:/host/cgroup/:ro
+    restart: always
 networks:
   app_network:
     driver: bridge
