@@ -22,14 +22,14 @@
 
         .container {
             max-width: 600px;
-            margin: 50px auto;
+            margin: 30px auto;
             background: #1e293b;
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        input {
+        input, textarea {
             width: 100%;
             padding: 12px;
             margin: 10px 0;
@@ -38,6 +38,8 @@
             background: #334155;
             color: white;
             outline: none;
+            box-sizing: border-box; /* Verhindert, dass Textarea/Inputs über den Rand stehen */
+            font-family: Arial, sans-serif;
         }
 
         button {
@@ -56,11 +58,20 @@
             background: #16a34a;
         }
 
+        /* Farbe für den Support-Button zur optischen Trennung */
+        .btn-support {
+            background: #3b82f6;
+        }
+        .btn-support:hover {
+            background: #2563eb;
+        }
+
         .card {
             margin-top: 20px;
             padding: 15px;
             background: #334155;
             border-radius: 8px;
+            white-space: pre-wrap; /* Damit JSON-Formatierung im Output schön bleibt */
         }
     </style>
 </head>
@@ -72,7 +83,14 @@
 </div>
 
 <div class="container">
+    <h3>Support Ticket erstellen</h3>
+    <input id="support_email" type="email" placeholder="Deine E-Mail-Adresse">
+    <textarea id="support_beschreibung" rows="3" placeholder="Problembeschreibung..."></textarea>
+    
+    <button class="btn-support" onclick="sendSupportTicket()">Support-Anfrage senden</button>
+</div>
 
+<div class="container">
     <h3>Workload erstellen</h3>
 
     <input id="vm_name" placeholder="VM Name">
@@ -87,6 +105,43 @@
 </div>
 
 <script>
+// NEU: Funktion für das Support-Ticket
+async function sendSupportTicket() {
+    const email = document.getElementById("support_email").value;
+    const beschreibung = document.getElementById("support_beschreibung").value;
+
+    if(!email || !beschreibung) {
+        alert("Bitte fülle alle Support-Felder aus.");
+        return;
+    }
+
+    // WICHTIG für die Uni/Bachelorarbeit: Ersetze die IP (10.1.90.123) 
+    // falls dein Support-API-Endpunkt auf einem anderen Port oder Host läuft!
+    const res = await fetch("http://10.1.90.123/support", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            email: email,
+            beschreibung: beschreibung
+        })
+    });
+
+    const data = await res.json();
+    
+    // Gibt das Ergebnis (z.B. die generierte ID) im Output-Feld unten aus
+    document.getElementById("output").innerText = 
+        "Support-Antwort: " + JSON.stringify(data, null, 2);
+
+    // Felder leeren bei Erfolg
+    if(res.ok) {
+        document.getElementById("support_email").value = "";
+        document.getElementById("support_beschreibung").value = "";
+    }
+}
+
+// Bestehende Funktion für Workloads
 async function createWorkload() {
     const vm_name = document.getElementById("vm_name").value;
     const cpu = document.getElementById("cpu").value;
